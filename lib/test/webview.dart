@@ -60,11 +60,14 @@ class _WebViewPageState extends State<WebViewPage> {
             });
             await Future.delayed(const Duration(seconds: 5));
             print('Đợi xong');
-            await _getHtmlContent();
-            await likeFacebook();
-            await disLikeYoutube();
-            //await likeTiktok();
+            //await _getHtmlContent();
+            // await likeFacebook();
+            // await disLikeYoutube();
+            await followTiktok();
+            //await followFacebook();
+            // await likeTiktok();
             //await likeYoutube();
+            //await commentFacebook();
             print('Hoàn thành tải URL: $url');
           },
           onWebResourceError: (WebResourceError error) {
@@ -142,38 +145,117 @@ class _WebViewPageState extends State<WebViewPage> {
         }
       })();
       """,
-      ).then((result) {});
+      ).then((result) {
+        print('Nhấn like facebook xong rồi');
+      });
+    } catch (e) {
+      print('Lỗi khi gửi sự kiện click: $e');
+    }
+  }
+
+  Future<void> followFacebook() async {
+    try {
+      print('Thực hiện nhấn');
+      await _controller.runJavaScript(
+        """
+      (function() {
+        var likeButton = document.querySelector('div[aria-label="Theo dõi"]');
+        if (likeButton) {
+          likeButton.click();
+          return 'Click event sent to like button.';
+        } else {
+          return 'Like button not found.';
+        }
+      })();
+      """,
+      ).then((result) {
+        print('Nhấn theo dõi facebook xong rồi');
+      });
+    } catch (e) {
+      print('Lỗi khi gửi sự kiện click: $e');
+    }
+  }
+
+  Future<void> commentFacebook() async {
+    try {
+      print('Thực hiện nhấn');
+      await _controller.runJavaScript(
+        """
+      (function() {
+        var likeButton = document.querySelector('div[aria-label="Viết bình luận"]');
+        if (likeButton) {
+          likeButton.click();
+          return 'Click event sent to like button.';
+        } else {
+          return 'Like button not found.';
+        }
+      })();
+      """,
+      ).then((result) {
+        print('Nhấn viết bình luận facebook xong rồi');
+      });
     } catch (e) {
       print('Lỗi khi gửi sự kiện click: $e');
     }
   }
 
   Future<void> likeTiktok() async {
-    // try {
-    //   print('Like tiktok');
-    //   await _controller.runJavaScript(
-    //     """
-    //   (function() {
-    //     var buttons = document.querySelectorAll('button.css-rninf8-ButtonActionItem.edu4zum0');
-    //     for (var i = 0; i < buttons.length; i++) {
-    //       var likeIcon = buttons[i].querySelector('span[data-e2e="like-icon"]');
-    //       if (likeIcon) {
-    //         buttons[i].click();
-    //         return 'Click event sent to like button.';
-    //       }
-    //     }
-    //     return 'Like button not found.';
-    //   })();
-    //   """,
-    //   ).then((result) {});
-    // } catch (e) {
-    //   print('Lỗi khi gửi sự kiện click: $e');
-    // }
-
-    _clickYoutubeNotifier.value = true;
-    await Future.delayed(Duration(milliseconds: 300));
-    _clickYoutubeNotifier.value = true;
+    try {
+      print('Thực hiện nhấn');
+      await _controller.runJavaScript("""
+        setTimeout(function() {
+          console.log('Đang tìm nút...');
+          var likeButton = document.querySelector('span[data-e2e="like-icon"]');
+          console.log('Nút:', likeButton);
+          if (likeButton) {
+            likeButton.click();
+            console.log('Click event sent to like button.');
+            return 'Click event sent to like button.';
+          } else {
+            console.log('Like button not found.');
+            return 'Like button not found.';
+          }
+        }, 1000);
+      """).then((result) {
+        //print(result);
+        print('Nhấn like tiktok xong rồi');
+      });
+    } catch (e) {
+      print('Lỗi khi gửi sự kiện click: $e');
+    }
   }
+
+  Future<void> followTiktok() async {
+    try {
+      print('Thực hiện nhấn');
+      await _controller.runJavaScript(
+        """
+          setTimeout(function() {
+          console.log('Đang tìm nút...');
+          var likeButton = document.querySelector('button[data-e2e="follow-button"]');
+          console.log('Nút:', likeButton);
+          if (likeButton) {
+            likeButton.click();
+            console.log('Click event sent to like button.');
+            return 'Click event sent to like button.';
+          } else {
+            console.log('Like button not found.');
+            return 'Like button not found.';
+          }
+        }, 3000);
+
+      """,
+      ).then((result) {
+        print('Nhấn theo dõi tiktok xong rồi');
+      });
+    } catch (e) {
+      print('Lỗi khi gửi sự kiện click: $e');
+    }
+  }
+
+  // _clickYoutubeNotifier.value = true;
+  // await Future.delayed(Duration(milliseconds: 300));
+  // _clickYoutubeNotifier.value = true;
 
   Future<void> likeYoutube() async {
     try {
@@ -191,7 +273,7 @@ class _WebViewPageState extends State<WebViewPage> {
       })();
       """,
       ).then((result) {
-        //print(result);
+        print('Nhấn like youtube xong rồi');
       });
     } catch (e) {
       print('Lỗi khi gửi sự kiện click: $e');
@@ -228,14 +310,21 @@ class _WebViewPageState extends State<WebViewPage> {
       setState(() {
         _htmlContent = html.toString();
       });
+      // Đếm số lần xuất hiện của "Thích video"
+      final RegExp likeRegex = RegExp('Thích video');
+      final matches = likeRegex.allMatches(_htmlContent);
+      final likeCount = matches.length;
+      print('Số lần xuất hiện của "Thích video": $likeCount');
       print('Nội dung HTML: $html');
-      // Tìm và in các đoạn HTML có chứa chữ "Thích"
-      // final RegExp regex = RegExp(r'[^>]*Nhắn tin[^<]*', caseSensitive: false);
-      // final Iterable<Match> matches = regex.allMatches(_htmlContent);
-
-      // for (final Match match in matches) {
-      //   print('Đoạn chứa "Thích": ${match.group(0)}');
-      // }
+      if (_htmlContent.contains('Thích video')) {
+        print('Nút like có trong HTML');
+        int indexLikeButton = _htmlContent.indexOf('Thích video');
+        String nutLike =
+            _htmlContent.substring(indexLikeButton - 50, indexLikeButton + 50);
+        print('Nút like là: $nutLike');
+      } else {
+        print('Nút like không có trong HTML');
+      }
     } catch (e) {
       print('Lỗi khi lấy nội dung HTML: $e');
     }
@@ -250,8 +339,6 @@ class _WebViewPageState extends State<WebViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -301,12 +388,19 @@ class _WebViewPageState extends State<WebViewPage> {
               ),
             ],
           ),
-          PositionedAutoClickWidget(
-            clickNotifier: _clickYoutubeNotifier,
-            position: Offset(width / 2, height / 2),
-          )
+          // PositionedAutoClickWidget(
+          //   clickNotifier: _clickYoutubeNotifier,
+          //   position: Offset(width / 2, height / 2),
+          // )
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.abc),
+          onPressed: () async {
+            // print('Nhấn like tiktok');
+            //await likeTiktok();
+            _getHtmlContent();
+          }),
     );
   }
 }
